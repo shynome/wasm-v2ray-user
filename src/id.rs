@@ -28,26 +28,43 @@ const B1: [u8; 16] = [
 const B2: [u8; 16] = [
   83u8, 62, 255, 138, 65, 19, 75, 16, 181, 206, 15, 93, 118, 185, 140, 210,
 ];
+const BEMPTY: &'static [u8] = &[];
+
+fn eq_two_hash(a: &[u8], b: &[u8]) -> bool {
+  true
+    && a[0] == b[0]
+    && a[1] == b[1]
+    && a[2] == b[2]
+    && a[3] == b[3]
+    && a[4] == b[4]
+    && a[5] == b[5]
+    && a[6] == b[6]
+    && a[7] == b[7]
+    && a[8] == b[8]
+    && a[9] == b[9]
+    && a[10] == b[10]
+    && a[11] == b[11]
+    && a[12] == b[12]
+    && a[13] == b[13]
+    && a[14] == b[14]
+    && a[15] == b[15]
+}
 
 #[wasm_bindgen]
-pub fn next_uuid(id: Uint8Array) -> Uint8Array {
-  id
-  // let mut hash = md5::Context::new();
-  // let _id = &*id;
-  // hash.consume(id);
-  // hash.consume(B1);
-  // let mut new_id: md5::Digest;
-  // loop {
-  //   hash.consume(B2);
-  //   new_id = hash.compute();
-  //   if (false) {
-  //     break;
-  //   }
-  //   hash.consume(B2);
-  // }
-  // let b = [
-  //   new_id[0], new_id[1], new_id[2], new_id[3], new_id[4], new_id[5], new_id[6], new_id[7],
-  //   new_id[8], new_id[9], new_id[10], new_id[11], new_id[12], new_id[13], new_id[14], new_id[15],
-  // ];
-  // Box::new(b)
+pub fn next_uuid(_id: Uint8Array) -> Uint8Array {
+  let id = &*_id;
+  let mut buf = [BEMPTY, id, &B1].concat();
+  let mut new_id: md5::Digest;
+  loop {
+    new_id = md5::compute(&buf);
+    if eq_two_hash(&new_id[..], id) == false {
+      break;
+    }
+    buf = [BEMPTY, &buf, &B2].concat();
+  }
+  let b = [
+    new_id[0], new_id[1], new_id[2], new_id[3], new_id[4], new_id[5], new_id[6], new_id[7],
+    new_id[8], new_id[9], new_id[10], new_id[11], new_id[12], new_id[13], new_id[14], new_id[15],
+  ];
+  Box::new(b)
 }
